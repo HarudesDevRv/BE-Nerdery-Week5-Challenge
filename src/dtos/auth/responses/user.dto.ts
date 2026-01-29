@@ -1,19 +1,23 @@
-import { Exclude, Expose } from 'class-transformer'
+import { $Enums } from "@prisma/client";
+import { Exclude, Expose } from "class-transformer";
 
 @Exclude()
 export class UserDto {
   @Expose()
-  readonly id!: string
+  readonly id!: string;
 
   @Expose()
-  readonly name!: string
+  readonly firstName!: string;
 
   @Expose()
-  readonly email!: string
+  readonly lastName!: string;
 
   @Expose()
-  readonly role!: string
+  readonly email!: string;
 
   @Expose()
-  readonly password!: string
+  readonly role!: $Enums.Role;
+
+  @Expose()
+  readonly password!: string;
 }

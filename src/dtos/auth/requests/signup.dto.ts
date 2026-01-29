@@ -1,16 +1,21 @@
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { $Enums } from "@prisma/client";
+import { IsEmail, IsOptional, IsString, MinLength } from "class-validator";
 
 export class SignUpDto {
-	@IsEmail()
-	readonly email!: string;
+  @IsEmail()
+  readonly email!: string;
 
-	@IsString()
-	readonly name!: string;
+  @IsString()
+  readonly firstName!: string;
 
-	@IsString()
-	readonly role!: string;
+  @IsString()
+  readonly lastName!: string;
 
-	@IsString()
-	@MinLength(4)
-	readonly password!: string;
+  @IsOptional()
+  @IsString()
+  readonly role?: $Enums.Role;
+
+  @IsString()
+  @MinLength(4)
+  readonly password!: string;
 }
