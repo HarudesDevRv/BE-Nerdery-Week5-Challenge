@@ -39,7 +39,6 @@ model User {
   firstName     String          @map("first_name") @db.VarChar(40)
   lastName      String          @map("last_name") @db.VarChar(40)
   password      String          @db.VarChar(70)
-  authToken     String?         @map("auth_token") @db.VarChar()
   createdAt     DateTime        @default(now()) @map("created_at")
   updatedAt     DateTime        @default(now()) @map("updated_at")
   passwordReset PasswordReset[]
@@ -47,16 +46,25 @@ model User {
   cart          Cart?
   orders        Order[]
   stores        Store[]
+  tokens        RefreshToken[]
+}
+
+model RefreshToken {
+  refreshToken String   @id @map("refresh_token") @db.VarChar()
+  userId       String   @map("user_id")
+  user         User     @relation(fields: [userId], references: [userId])
+  createdAt    DateTime @default(now()) @map("created_at")
+  expiresAt    DateTime @map("expiration_time")
+  revoked      Boolean  @default(false)
 }
 
 model PasswordReset {
-  resetId   String   @id @default(uuid()) @map("reset_id")
-  userId    String   @map("user_id")
-  user      User     @relation(fields: [userId], references: [userId])
-  token     String   @unique
-  consumed  Boolean
-  createdAt DateTime @default(now()) @map("created_at")
-  expiresAt DateTime @default(now()) @map("expires_at")
+  resetToken String   @id @map("reset_token") @db.VarChar()
+  userId     String   @map("user_id")
+  user       User     @relation(fields: [userId], references: [userId])
+  consumed   Boolean  @default(false)
+  createdAt  DateTime @default(now()) @map("created_at")
+  expiresAt  DateTime @default(now()) @map("expires_at")
 }
 
 model Category {

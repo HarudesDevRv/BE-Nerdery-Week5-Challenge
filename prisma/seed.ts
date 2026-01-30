@@ -2,7 +2,7 @@ import prisma from "../src/prisma";
 import * as bcrypt from "bcrypt";
 const saltRounds = 10;
 
-async function main() {
+async function seed() {
   await prisma.user.create({
     include: { address: {} },
     data: {
@@ -45,8 +45,12 @@ async function main() {
   });
 }
 
-main().catch(async (e) => {
-  console.error(e);
-  await prisma.$disconnect();
-  process.exit(1);
-});
+seed()
+  .then(() => {
+    console.log("Seeder executed successfully");
+  })
+  .catch(async (e) => {
+    console.error(e);
+    await prisma.$disconnect();
+    process.exit(1);
+  });
