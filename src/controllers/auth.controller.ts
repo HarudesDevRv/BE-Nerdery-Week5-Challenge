@@ -5,6 +5,8 @@ import { validate } from "class-validator";
 import { AuthService } from "../services/auth.service";
 import { SignInDto } from "../dtos/auth/requests/signin.dto";
 import { SignOutDto } from "../dtos/auth/requests/signout.dto";
+import { ForgotPasswordDto } from "../dtos/auth/requests/forgot_password.dto";
+import { ResetPasswordDto } from "../dtos/auth/requests/reset_password.dto";
 
 export async function signup(req: Request, res: Response): Promise<void> {
   const dto = plainToInstance(SignUpDto, req.body);
@@ -78,7 +80,73 @@ export async function signout(req: Request, res: Response): Promise<void> {
   try {
     await AuthService.signout(dto);
 
-    res.status(204);
+    res.status(204).json();
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      const statusCode = (error as any).statusCode || 500;
+
+      res.status(statusCode).json({
+        message: error.message || "Internal server error",
+        name: error.name,
+      });
+    } else {
+      res.status(500).json({
+        message: "Internal server error",
+        name: "UnknownError",
+      });
+    }
+  }
+}
+
+export async function forgotPassword(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  const dto = plainToInstance(ForgotPasswordDto, req.body);
+  const errors = await validate(dto);
+
+  if (errors.length > 0) {
+    res.status(400).send({ message: "Validation failed", details: errors });
+    return;
+  }
+
+  try {
+    const result = await AuthService.forgotPassword(dto);
+
+    res.status(200).json(result);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      const statusCode = (error as any).statusCode || 500;
+
+      res.status(statusCode).json({
+        message: error.message || "Internal server error",
+        name: error.name,
+      });
+    } else {
+      res.status(500).json({
+        message: "Internal server error",
+        name: "UnknownError",
+      });
+    }
+  }
+}
+
+export async function resetPassword(
+  req: Request,
+  res: Response,
+): Promise<void> {
+  const dto = plainToInstance(ResetPasswordDto, req.body);
+  const errors = await validate(dto);
+
+  if (errors.length > 0) {
+    res.status(400).send({ message: "Validation failed", details: errors });
+    return;
+  }
+
+  try {
+    const result = await AuthService.resetPassword(dto);
+
+    res.status(200).json(result);
   } catch (error: unknown) {
     if (error instanceof Error) {
       const statusCode = (error as any).statusCode || 500;

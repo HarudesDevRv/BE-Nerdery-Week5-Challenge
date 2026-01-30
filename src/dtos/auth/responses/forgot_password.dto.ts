@@ -1,9 +1,9 @@
 import { Exclude, Expose } from "class-transformer";
 
 @Exclude()
-export class CredentialsDto {
+export class ResetToken {
   @Expose()
-  readonly refresh_token!: string;
+  readonly reset_token!: string;
 
   @Expose()
   readonly expires_at!: Date;

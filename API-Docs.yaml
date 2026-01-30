@@ -1,0 +1,1206 @@
+openapi: 3.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/ravn-754/Nerdery/1.0.0
+info:
+  description: This is a simple API
+  version: "1.0.0"
+  title: T-shirt shop API
+  contact:
+    email: luisrendon@ravn.co
+  license:
+    name: Apache 2.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+tags:
+  - name: Managers
+    description: Manage the products
+  - name: Clients
+    description: Search and buy products
+  - name: Authentication
+    description: Authentication endpoints
+paths:
+  /api/v1/products:
+    get:
+      tags:
+        - Clients
+        - Public
+      summary: Gets the products
+      operationId: getProducts
+      description: Gets a paginated list of products with the option to filter by category name, and specify the page and the products by page.
+      parameters:
+        - in: query
+          name: category
+          description: Category name
+          schema:
+            type: string
+          required: false
+        - in: query
+          name: page
+          description: Pagination page
+          schema:
+            type: integer
+          required: false
+        - in: query
+          name: limit
+          description: Pagination limit
+          schema:
+            type: integer
+          required: false
+      responses:
+        "200":
+          description: Search results matching criteria
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - pagination_data
+                  - data
+                properties:
+                  message:
+                    type: string
+                    example: Products retrieved successfully
+                  pagination_data:
+                    $ref: "#/components/schemas/PaginationData"
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/DetailedProduct"
+        "400":
+          description: Bad input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InputError"
+        "404":
+          description: Category not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFoundError"
+    post:
+      tags:
+        - Managers
+      summary: Creates a new product
+      operationId: createProduct
+      description: Adds a product to the system by specifying the product data, category id, brand id, images and a list of inventories
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewProduct"
+        description: Product to add
+      responses:
+        "200":
+          description: Product created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Product created successfully"
+                  data:
+                    $ref: "#/components/schemas/NewProductResult"
+        "400":
+          description: Bad input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InputError"
+        "401":
+          description: Unauthenticated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthenticatedError"
+        "403":
+          description: Unauthorized user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+  /api/v1/products/{id}:
+    get:
+      tags:
+        - Clients
+        - Public
+      summary: Gets a product detail
+      operationId: getProductDetail
+      description: Gets the detail of the product referenced by the id
+      parameters:
+        - in: path
+          name: id
+          description: The id of the product
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Product detail
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  message:
+                    type: string
+                    example: Item detail retrieved successfully
+                  data:
+                    $ref: "#/components/schemas/DetailedProduct"
+        "400":
+          description: Bad input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InputError"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFoundError"
+    put:
+      tags:
+        - Managers
+      summary: Updates a product
+      operationId: updateProduct
+      description: Updates the data of the product referred with the id
+      parameters:
+        - in: path
+          name: id
+          description: The id of the product
+          required: true
+          schema:
+            type: integer
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewProduct"
+      responses:
+        "200":
+          description: Product successfully updated
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: "Product updated successfully"
+                  data:
+                    $ref: "#/components/schemas/NewProductResult"
+        "400":
+          description: Bad input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InputError"
+        "401":
+          description: Unauthenticated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthenticatedError"
+        "403":
+          description: Unauthorized user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFoundError"
+    patch:
+      tags:
+        - Managers
+      summary: Partially updates an existing product
+      operationId: patchProduct
+      description: Partially updates the product referred by the id
+      parameters:
+        - in: path
+          name: id
+          description: The id of the product
+          required: true
+          schema:
+            type: integer
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OptionalProduct"
+      responses:
+        "200":
+          description: Successfully updated the product
+          content:
+            application/json:
+              schema:
+                properties:
+                  message:
+                    type: string
+                    example: Product updated successfully
+                  data:
+                    $ref: "#/components/schemas/DetailedProduct"
+        "400":
+          description: Bad input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InputError"
+        "401":
+          description: Unauthenticated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthenticatedError"
+        "403":
+          description: Unauthorized user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFoundError"
+    delete:
+      tags:
+        - Managers
+      summary: Deletes a product
+      operationId: deleteProduct
+      description: Deletes the product referred by the id
+      parameters:
+        - in: path
+          name: id
+          description: The id of the product
+          required: true
+          schema:
+            type: string
+            format: uuid
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Product successfully deleted
+        "400":
+          description: Bad input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InputError"
+        "401":
+          description: Unauthenticated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthenticatedError"
+        "403":
+          description: Unauthorized user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFoundError"
+  /api/v1/categories:
+    get:
+      tags:
+        - Clients
+        - Public
+      summary: Gets all the available categories
+      description: Gets a list with all the available categories data
+      operationId: getCategories
+      responses:
+        "200":
+          description: Categories successfully retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      categories:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Category"
+  /api/v1/products/{id}/likes:
+    put:
+      tags:
+        - Clients
+      summary: Like a product
+      description: Changes the Like status of a product for an specific user
+      operationId: likeProduct
+      parameters:
+        - in: path
+          name: id
+          description: The id of the product
+          required: true
+          schema:
+            type: integer
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductLike"
+      responses:
+        "200":
+          description: Like status successfully modified
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Like status modified successfully
+                  data:
+                    $ref: "#/components/schemas/ProductLike"
+        "400":
+          description: Bad input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InputError"
+        "401":
+          description: Unauthenticated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthenticatedError"
+        "403":
+          description: Unauthorized user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+        "404":
+          description: Product or User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFoundError"
+  /api/v1/clients/{id}/orders:
+    get:
+      tags:
+        - Managers
+      summary: Gets a client orders
+      description: Gets the orders of the client referred by the id
+      operationId: getClientOrders
+      parameters:
+        - in: path
+          name: id
+          description: The id of the client
+          required: true
+          schema:
+            type: integer
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Client orders successfully retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Client orders retrieved successfully
+                  data:
+                    type: object
+                    required:
+                      - orders
+                    properties:
+                      orders:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/DetailedOrder"
+        "401":
+          description: Unauthenticated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthenticatedError"
+        "403":
+          description: Unauthorized user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+        "404":
+          description: Client not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFoundError"
+    post:
+      tags:
+        - Clients
+      summary: Creates a client order
+      description: Creates a user order related to the user referred by the id
+      operationId: createOrder
+      parameters:
+        - in: path
+          name: id
+          description: The id of the client
+          required: true
+          schema:
+            type: integer
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Order"
+      responses:
+        "200":
+          description: Order successfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Order successfully created
+                  data:
+                    $ref: "#/components/schemas/DetailedOrder"
+        "401":
+          description: Unauthenticated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthenticatedError"
+        "403":
+          description: Unauthorized user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+        "404":
+          description: Client not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFoundError"
+  /api/v1/clients/{id}/carts:
+    post:
+      tags:
+        - Clients
+      summary: Adds a product to the client cart
+      description: Add a product to the cart of the client specified by the id
+      operationId: addItemToCart
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CartItem"
+      responses:
+        "200":
+          description: Item successfully added to the client cart
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Item successfully added to the client cart
+                  data:
+                    $ref: "#/components/schemas/Cart"
+        "401":
+          description: Unauthenticated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthenticatedError"
+        "403":
+          description: Unauthorized user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+        "404":
+          description: Client not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFoundError"
+    put:
+      tags:
+        - Clients
+      summary: Updates the cart products
+      description: Updates the full list of items of the cart for the user specified by the id
+      operationId: deleteCartItem
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - products
+              properties:
+                products:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/CartItem"
+      responses:
+        "200":
+          description: Cart items successfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Cart items successfully updated
+                  data:
+                    $ref: "#/components/schemas/Cart"
+        "400":
+          description: Bad input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InputError"
+        "401":
+          description: Unauthenticated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthenticatedError"
+        "403":
+          description: Unauthorized user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+        "404":
+          description: Client not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFoundError"
+
+  /api/v1/auth/signin:
+    post:
+      tags:
+        - Authentication
+      summary: Signs in with email and password
+      description: Signs in a user with the provided credentials and returns the refresh token generated for that user
+      operationId: signInWithEmailAndPassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignInData"
+      responses:
+        "200":
+          description: User successfully signed in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccessToken"
+        "400":
+          description: Bad input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InputError"
+  /api/v1/auth/signup:
+    post:
+      tags:
+        - Authentication
+      summary: Signs up with the user data
+      description: Signs up a user with the provided credentials and returns the refresh token generated for that user
+      operationId: signUpWithEmailAndPassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignUpData"
+      responses:
+        "200":
+          description: User successfully signed up
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccessToken"
+        "400":
+          description: Bad input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InputError"
+  /api/v1/auth/signout:
+    post:
+      tags:
+        - Authentication
+      summary: Signs out the user
+      description: Signs out the user of the provided email and revokes the refreshes token used in that session
+      operationId: signOutUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - refresh_token
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@mail.com
+                refresh_token:
+                  type: string
+                  format: JWT
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RfY2xpZW50MkBtYWlsLmNvbSIsInJvbGUiOiJDbGllbnQiLCJpYXQiOjE3Njk3MjA1MDYsImV4cCI6MTc3NDkwNDUwNn0.xW6ZPFovgBmPLEmCVzQszS9OyEJyEjwcK3OyaWba1jU
+      responses:
+        "204":
+          description: User successfully signed out
+        "400":
+          description: Bad input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InputError"
+  /api/v1/auth/forgot-password:
+    post:
+      tags:
+        - Authentication
+      summary: Sends an email for forgotten password
+      description: Sends a email to the user of the provided email and returns the generated reset token for the password reset
+      operationId: userForgotPassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@mail.com
+      responses:
+        "200":
+          description: Email sent for password reset
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - reset_token
+                  - expires_at
+                properties:
+                  reset_token:
+                    type: string
+                    format: JWT
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RfY2xpZW50QG1haWwuY29tIiwicm9sZSI6IkNsaWVudCIsImlhdCI6MTc2OTcyMTg5OCwiZXhwIjoxNzY5NzIyNzk4fQ.b3cY5xb1BQqbrISGjmx1pgcRItozKSbmHP-da2o6KpU
+                  expires_at:
+                    type: string
+                    format: date-time
+        "400":
+          description: Bad input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InputError"
+  /api/v1/auth/reset-password:
+    post:
+      tags:
+        - Authentication
+      summary: Resets the user password
+      description: Validate the reset token to exist and not be consumed nor expired, change the user password and revoke all the users refresh tokens
+      operationId: userResetPassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reset_token
+                - new_password
+              properties:
+                reset_token:
+                  type: string
+                  format: JWT
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RfY2xpZW50QG1haWwuY29tIiwicm9sZSI6IkNsaWVudCIsImlhdCI6MTc2OTcyMTg5OCwiZXhwIjoxNzY5NzIyNzk4fQ.b3cY5xb1BQqbrISGjmx1pgcRItozKSbmHP-da2o6KpU
+                new_password:
+                  type: string
+                  format: password
+                  example: 12345678
+      responses:
+        "200":
+          description: Password successfully reset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccessToken"
+        "400":
+          description: Bad input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InputError"
+components:
+  securitySchemes:
+    bearerAuth: # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT # optional, arbitrary value for documentation purposes
+  schemas:
+    TimeStamp:
+      type: object
+      required:
+        - created_at
+        - updated_at
+      properties:
+        created_at:
+          type: string
+          format: date-time
+          example: 2026-01-26T:14:40:35Z
+        updated_at:
+          type: string
+          format: date-time
+          example: 2026-01-28T:14:40:35Z
+    Category:
+      allOf:
+        - type: object
+          properties:
+            name:
+              type: string
+              example: Formal
+            description:
+              type: string
+              example: The best for special moments
+            image_url:
+              type: string
+              format: url
+              example: www.imageLink.com
+        - $ref: "#/components/schemas/TimeStamp"
+    OrderProduct:
+      type: object
+      required:
+        - inventory_id
+        - amount
+        - price
+      properties:
+        inventory_id:
+          type: string
+          format: uuid
+        amount:
+          type: integer
+          example: 4
+          minimum: 1
+        price:
+          type: number
+          example: 14.99
+          minimum: 0
+          exclusiveMinimum: true
+    Order:
+      type: object
+      required:
+        - user_id
+        - total
+        - currency
+        - products
+        - status
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        total:
+          type: number
+          example: 59.96
+          minimum: 0.01
+        currency:
+          type: string
+          example: USD
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderProduct"
+          minItems: 1
+        status:
+          type: string
+          example: Pending
+    Payment:
+      type: object
+      properties:
+        stripe_id:
+          type: string
+          example: cs_test_a11YYufWQzNY63zpQ6QSNRQhkUpVph4WRmzW0zWJO2znZKdVujZ0N0S22u
+        amount_subtotal:
+          type: number
+          example: 59.96
+        amount_total:
+          type: number
+          example: 59.96
+        currency:
+          type: string
+          example: usd
+        payment_method_types:
+          type: array
+          items:
+            type: string
+            example: card
+        payment_status:
+          type: string
+          example: unpaid
+        status:
+          type: string
+          example: open
+        url:
+          type: string
+          format: url
+          example: https://checkout.stripe.com/c/pay/cs_test_a11YYufWQzNY63zpQ6QSNRQhkUpVph4WRmzW0zWJO2znZKdVujZ0N0S22u#fidkdWxOYHwnPyd1blpxYHZxWjA0SDdPUW5JbmFMck1wMmx9N2BLZjFEfGRUNWhqTmJ%2FM2F8bUA2SDRySkFdUV81T1BSV0YxcWJcTUJcYW5rSzN3dzBLPUE0TzRKTTxzNFBjPWZEX1NKSkxpNTVjRjN8VHE0YicpJ2N3amhWYHdzYHcnP3F3cGApJ2lkfGpwcVF8dWAnPyd2bGtiaWBabHFgaCcpJ2BrZGdpYFVpZGZgbWppYWB3dic%2FcXdwYHgl
+    DetailedOrder:
+      allOf:
+        - type: object
+          required:
+            - order_id
+          properties:
+            order_id:
+              type: string
+              format: uuid
+        - $ref: "#/components/schemas/Order"
+        - type: object
+          properties:
+            payment:
+              $ref: "#/components/schemas/Payment"
+        - $ref: "#/components/schemas/TimeStamp"
+    Inventory:
+      type: object
+      required:
+        - store_id
+        - price
+        - sale_price
+        - stock
+        - is_active
+      properties:
+        store_id:
+          type: string
+          format: uuid
+        price:
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+          example: 19.99
+        sale_price:
+          type: number
+          minimum: 0
+          example: 16.99
+          exclusiveMinimum: true
+          default: null
+        stock:
+          type: integer
+          minimum: 0
+          example: 10
+          default: 0
+        is_active:
+          type: boolean
+          example: true
+          default: true
+    BaseProduct:
+      type: object
+      properties:
+        name:
+          type: string
+          example: White T-shirt
+        description:
+          type: string
+          example: Formal T-shirt
+        inventories:
+          type: array
+          items:
+            $ref: "#/components/schemas/Inventory"
+        image_urls:
+          type: array
+          items:
+            type: string
+          example:
+            - www.imageLink.com
+            - www.image2Link.com
+        is_active:
+          type: boolean
+          example: true
+          default: true
+    OptionalProduct:
+      allOf:
+        - type: object
+          properties:
+            category_id:
+              type: string
+              format: uuid
+            brand_id:
+              type: string
+              format: uuid
+        - $ref: "#/components/schemas/BaseProduct"
+    NewProduct:
+      allOf:
+        - $ref: "#/components/schemas/OptionalProduct"
+      required:
+        - category_id
+        - brand_id
+        - name
+        - description
+        - inventories
+        - image_urls
+    NewProductResult:
+      allOf:
+        - type: object
+          required:
+            - product_id
+          properties:
+            product_id:
+              type: string
+              format: uuid
+        - $ref: "#/components/schemas/NewProduct"
+        - $ref: "#/components/schemas/TimeStamp"
+    DetailedProduct:
+      allOf:
+        - type: object
+          properties:
+            product_id:
+              type: string
+              format: uuid
+            category:
+              type: string
+              example: Formal
+            brand:
+              type: string
+              example: Nike
+        - $ref: "#/components/schemas/BaseProduct"
+        - $ref: "#/components/schemas/TimeStamp"
+      required:
+        - product_id
+        - category
+        - brand
+        - name
+        - description
+        - inventories
+        - image_urls
+        - is_active
+    CartItem:
+      type: object
+      required:
+        - inventory_id
+        - amount
+      properties:
+        inventory_id:
+          type: string
+          format: uuid
+        amount:
+          type: integer
+          minimum: 0
+          example: 5
+    Cart:
+      type: object
+      required:
+        - user_id
+        - items
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CartItem"
+    ProductLike:
+      type: object
+      required:
+        - product_id
+        - user_id
+        - value
+      properties:
+        product_id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        value:
+          type: boolean
+    PaginationData:
+      type: object
+      properties:
+        current_page:
+          type: integer
+          default: 1
+          minimum: 1
+        per_page:
+          type: integer
+          default: 10
+        total_pages:
+          type: integer
+          minimum: 1
+          example: 5
+    SignInData:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@mail.com
+        password:
+          type: string
+          format: password
+          example: abc123
+    SignUpData:
+      allOf:
+        - $ref: "#/components/schemas/SignInData"
+        - type: object
+          required:
+            - first_name
+            - last_name
+          properties:
+            first_name:
+              type: string
+              example: Javier
+            last_name:
+              type: string
+              example: Arias
+            role:
+              type: string
+              enum: [Client, Manager]
+    AccessToken:
+      type: object
+      required:
+        - refresh_token
+        - expires_at
+      properties:
+        refresh_token:
+          type: string
+          format: JWT
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfMTIzIiwiZ3JhbnRzIjp7ImNhbGVuZGFyIjp7InJlYWQiOnRydWUsIndyaXRlIjp0cnVlfX0sImlzcyI6Imh0dHBzOi8vYXBpLmVkZXhhbXBsZS5jb20vY2FsZW5kYXIvdjEvIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZWRleGFtcGxlLmNvbS9jYWxlbmRhci92MS8iLCJpYXQiOjE0NTg3ODU3OTYsImV4cCI6MTQ1ODg3MjE5Nn0.8n44l_g8wR8_k0f-rL4B9p1l_z_eGqXv8cQ8oZ0oZ0w
+        expires_at:
+          type: string
+          format: date-time
+    ValidationError:
+      type: object
+      properties:
+        code:
+          type: string
+          example: VALIDATION_FAILED
+        message:
+          type: string
+          example: Validation failed
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              target:
+                type: object
+                example:
+                  productPrice: abcd
+              property:
+                type: string
+                example: productPrice
+              constraints:
+                type: object
+                example:
+                  isNumber: productPrice must be a number
+    MissingFieldError:
+      type: object
+      properties:
+        code:
+          type: string
+          example: MISSING_REQUIRED_FIELD
+        message:
+          type: string
+          example: Missing required field
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              target:
+                type: object
+                example:
+                  productName: T-shirt
+              property:
+                type: string
+                example: productPrice
+              constraints:
+                type: object
+                example:
+                  isNumber: productPrice must be a number
+    InputError:
+      oneOf:
+        - $ref: "#/components/schemas/ValidationError"
+        - $ref: "#/components/schemas/MissingFieldError"
+    NotFoundError:
+      type: object
+      properties:
+        code:
+          type: string
+          example: CATEGORY_NOT_FOUND
+        message:
+          type: string
+          example: Category not found
+    UnauthenticatedError:
+      type: object
+      properties:
+        code:
+          type: string
+          example: ACCESS_TOKEN_EXPIRED
+        message:
+          type: string
+          example: Access token expired
+    UnauthorizedError:
+      type: object
+      properties:
+        code:
+          type: string
+          example: MISSING_PRODUCT_PERMISSIONS
+        message:
+          type: string
+          example: The user is missing the required permission

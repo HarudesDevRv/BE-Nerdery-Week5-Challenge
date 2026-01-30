@@ -4,9 +4,6 @@ import { Exclude, Expose } from "class-transformer";
 @Exclude()
 export class UserDto {
   @Expose()
-  readonly id!: string;
-
-  @Expose()
   readonly firstName!: string;
 
   @Expose()
@@ -19,5 +16,8 @@ export class UserDto {
   readonly role!: $Enums.Role;
 
   @Expose()
-  readonly password!: string;
+  readonly refresh_token!: string;
+
+  @Expose()
+  readonly expires_at!: Date;
 }
