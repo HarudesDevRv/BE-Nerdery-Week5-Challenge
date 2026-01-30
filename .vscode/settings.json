@@ -1,9 +1,0 @@
-{
-  "prisma.pinToPrisma6": true,
-  "cSpell.words": ["autoincrement", "dtos", "nerdery", "pagila"],
-  "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "[prisma]": {
-    "editor.defaultFormatter": "Prisma.prisma"
-  }
-}
