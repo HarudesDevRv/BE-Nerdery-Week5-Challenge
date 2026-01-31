@@ -857,37 +857,6 @@ paths:
                   data:
                     $ref: "#/components/schemas/Payment"
 
-  /api/v1/auth/signin:
-    post:
-      tags:
-        - Authentication
-      summary: Signs in with email and password
-      description: Signs in a user with the provided credentials and returns the refresh token generated for that user
-      operationId: signInWithEmailAndPassword
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SignInData"
-      responses:
-        "200":
-          description: User successfully signed in
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/AccessToken"
-        "400":
-          description: Bad input data
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/InputError"
-        "409":
-          description: Conflict with database
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ConflictError"
   /api/v1/auth/signup:
     post:
       tags:
@@ -906,7 +875,50 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AccessToken"
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User successfully signed up
+                  data:
+                    $ref: "#/components/schemas/AccessToken"
+        "400":
+          description: Bad input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InputError"
+        "409":
+          description: Conflict with database
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConflictError"
+  /api/v1/auth/signin:
+    post:
+      tags:
+        - Authentication
+      summary: Signs in with email and password
+      description: Signs in a user with the provided credentials and returns the refresh token generated for that user
+      operationId: signInWithEmailAndPassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignInData"
+      responses:
+        "200":
+          description: User successfully signed in
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User successfully signed in
+                  data:
+                    $ref: "#/components/schemas/AccessToken"
         "400":
           description: Bad input data
           content:
@@ -984,17 +996,12 @@ paths:
             application/json:
               schema:
                 type: object
-                required:
-                  - reset_token
-                  - expires_at
                 properties:
-                  reset_token:
+                  message:
                     type: string
-                    format: JWT
-                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RfY2xpZW50QG1haWwuY29tIiwicm9sZSI6IkNsaWVudCIsImlhdCI6MTc2OTcyMTg5OCwiZXhwIjoxNzY5NzIyNzk4fQ.b3cY5xb1BQqbrISGjmx1pgcRItozKSbmHP-da2o6KpU
-                  expires_at:
-                    type: string
-                    format: date-time
+                    example: Email sent for password reset
+                  data:
+                    $ref: "#/components/schemas/ResetToken"
         "400":
           description: Bad input data
           content:
@@ -1033,11 +1040,17 @@ paths:
                   example: 12345678
       responses:
         "200":
-          description: Password successfully reset
+          description: User password successfully changed
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AccessToken"
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User password successfully changed
+                  data:
+                    $ref: "#/components/schemas/AccessToken"
         "400":
           description: Bad input data
           content:
@@ -1383,6 +1396,19 @@ components:
         - expires_at
       properties:
         refresh_token:
+          type: string
+          format: JWT
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfMTIzIiwiZ3JhbnRzIjp7ImNhbGVuZGFyIjp7InJlYWQiOnRydWUsIndyaXRlIjp0cnVlfX0sImlzcyI6Imh0dHBzOi8vYXBpLmVkZXhhbXBsZS5jb20vY2FsZW5kYXIvdjEvIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZWRleGFtcGxlLmNvbS9jYWxlbmRhci92MS8iLCJpYXQiOjE0NTg3ODU3OTYsImV4cCI6MTQ1ODg3MjE5Nn0.8n44l_g8wR8_k0f-rL4B9p1l_z_eGqXv8cQ8oZ0oZ0w
+        expires_at:
+          type: string
+          format: date-time
+    ResetToken:
+      type: object
+      required:
+        - reset_token
+        - expires_at
+      properties:
+        reset_token:
           type: string
           format: JWT
           example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3JfMTIzIiwiZ3JhbnRzIjp7ImNhbGVuZGFyIjp7InJlYWQiOnRydWUsIndyaXRlIjp0cnVlfX0sImlzcyI6Imh0dHBzOi8vYXBpLmVkZXhhbXBsZS5jb20vY2FsZW5kYXIvdjEvIiwiYXVkIjoiaHR0cHM6Ly9hcGkuZWRleGFtcGxlLmNvbS9jYWxlbmRhci92MS8iLCJpYXQiOjE0NTg3ODU3OTYsImV4cCI6MTQ1ODg3MjE5Nn0.8n44l_g8wR8_k0f-rL4B9p1l_z_eGqXv8cQ8oZ0oZ0w

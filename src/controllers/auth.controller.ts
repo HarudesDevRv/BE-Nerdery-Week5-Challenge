@@ -20,7 +20,9 @@ export async function signup(req: Request, res: Response): Promise<void> {
   try {
     const result = await AuthService.signup(dto);
 
-    res.status(200).json(result);
+    res
+      .status(200)
+      .json({ message: "User successfully signed up", data: result });
   } catch (error: unknown) {
     if (error instanceof Error) {
       const statusCode = (error as any).statusCode || 500;
@@ -50,7 +52,9 @@ export async function signin(req: Request, res: Response): Promise<void> {
   try {
     const result = await AuthService.signin(dto);
 
-    res.status(200).json(result);
+    res
+      .status(200)
+      .json({ message: "User successfully signed in", data: result });
   } catch (error: unknown) {
     if (error instanceof Error) {
       const statusCode = (error as any).statusCode || 500;
@@ -113,7 +117,9 @@ export async function forgotPassword(
   try {
     const result = await AuthService.forgotPassword(dto);
 
-    res.status(200).json(result);
+    res
+      .status(200)
+      .json({ message: "Email sent for password reset", data: result });
   } catch (error: unknown) {
     if (error instanceof Error) {
       const statusCode = (error as any).statusCode || 500;
@@ -146,7 +152,9 @@ export async function resetPassword(
   try {
     const result = await AuthService.resetPassword(dto);
 
-    res.status(200).json(result);
+    res
+      .status(200)
+      .json({ message: "User password successfully changed", data: result });
   } catch (error: unknown) {
     if (error instanceof Error) {
       const statusCode = (error as any).statusCode || 500;

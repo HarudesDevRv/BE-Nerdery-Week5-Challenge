@@ -59,9 +59,9 @@ export class AuthService {
       data: {
         userId: user?.userId,
         resetToken: jwt.sign({ email, role: user!.role }, privateKey, {
-          expiresIn: "15m",
+          expiresIn: "5m",
         }),
-        expiresAt: new Date(Date.now() + 15 * 60 * 1000),
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000),
       },
     });
 
