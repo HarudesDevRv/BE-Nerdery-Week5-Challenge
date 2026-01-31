@@ -10,7 +10,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://postgres:pass_nerdery@localhost:5432/nerdery_db?schema=pagila"
+  url      = "postgresql://postgres:pass_nerdery@localhost:5432/nerdery_db?schema=ecommerce"
 }
 
 enum Role {
