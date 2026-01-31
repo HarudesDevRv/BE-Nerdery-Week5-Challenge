@@ -170,23 +170,6 @@ export class AuthService {
       },
     });
 
-    const mailOptions = {
-      from: "luisrendon@ravn.co",
-      to: "harudes20@gmail.com",
-      subject: "Sending Email using Node.js",
-      text: "That was easy!",
-    };
-
-    const result = await mailer.sendMail(mailOptions);
-
-    if (result.accepted) {
-      console.log("mail sent");
-    }
-
-    if (result.rejected) {
-      console.log("Error");
-    }
-
     const resetPassword = await this.createResetToken(user.email);
 
     return resetPassword;
