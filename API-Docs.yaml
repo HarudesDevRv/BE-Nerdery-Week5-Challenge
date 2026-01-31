@@ -4,14 +4,11 @@ servers:
   - description: SwaggerHub API Auto Mocking
     url: https://virtserver.swaggerhub.com/ravn-754/Nerdery/1.0.0
 info:
-  description: This is a simple API
+  description: This is an API that manages a T-shirt ecommerce
   version: "1.0.0"
   title: T-shirt shop API
   contact:
     email: luisrendon@ravn.co
-  license:
-    name: Apache 2.0
-    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 tags:
   - name: Managers
     description: Manage the products
@@ -297,6 +294,219 @@ paths:
       responses:
         "204":
           description: Product successfully deleted
+        "400":
+          description: Bad input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InputError"
+        "401":
+          description: Unauthenticated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthenticatedError"
+        "403":
+          description: Unauthorized user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFoundError"
+
+  /api/v1/products/{id}/images:
+    post:
+      tags:
+        - Managers
+      summary: Adds an image to a product
+      description: Adds an image url to the product images
+      operationId: addImageToProduct
+      parameters:
+        - in: path
+          name: id
+          description: The id of the product
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                image_url:
+                  type: string
+                  format: url
+                  example: www.imageUrl.com
+      responses:
+        "200":
+          description: Image successfully added
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Image successfully added
+                  data:
+                    properties:
+                      product_id:
+                        type: string
+                        format: uuid
+                      images:
+                        type: array
+                        items:
+                          type: string
+                          format: url
+                        example:
+                          - www.imageUrl.com
+                          - www.image2Url.com
+        "400":
+          description: Bad input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InputError"
+        "401":
+          description: Unauthenticated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthenticatedError"
+        "403":
+          description: Unauthorized user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFoundError"
+  /api/v1/products/{product}/images/{image}:
+    put:
+      tags:
+        - Managers
+      summary: Replaces an image from a product
+      description: Replaces an image url from the product images
+      operationId: replaceImageFromProduct
+      parameters:
+        - in: path
+          name: product
+          description: The id of the product
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: image
+          description: The id of the image
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Image successfully replaced
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Image successfully replaced
+                  data:
+                    properties:
+                      product_id:
+                        type: string
+                        format: uuid
+                      images:
+                        type: array
+                        items:
+                          type: string
+                          format: url
+                        example:
+                          - www.imageUrl.com
+                          - www.image2Url.com
+        "400":
+          description: Bad input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InputError"
+        "401":
+          description: Unauthenticated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthenticatedError"
+        "403":
+          description: Unauthorized user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFoundError"
+    delete:
+      tags:
+        - Managers
+      summary: Deletes an image from a product
+      description: Deletes an image url from the product images
+      operationId: deleteImageFromProduct
+      parameters:
+        - in: path
+          name: product
+          description: The id of the product
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: image
+          description: The id of the image
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Image successfully deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Image successfully deleted
+                  data:
+                    properties:
+                      product_id:
+                        type: string
+                        format: uuid
+                      images:
+                        type: array
+                        items:
+                          type: string
+                          format: url
+                        example:
+                          - www.imageUrl.com
+                          - www.image2Url.com
         "400":
           description: Bad input data
           content:
@@ -621,6 +831,31 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/NotFoundError"
+  /api/v1/payments:
+    post:
+      tags:
+        - Clients
+      summary: Stores the Stripe payment data
+      description: Stores the Stripe payment data according to the stripe_id and links it to its order
+      operationId: storeStripePayment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Payment"
+      responses:
+        "200":
+          description: Payment stored successfuly
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Payment stored successfully
+                  data:
+                    $ref: "#/components/schemas/Payment"
 
   /api/v1/auth/signin:
     post:
@@ -647,6 +882,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/InputError"
+        "409":
+          description: Conflict with database
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConflictError"
   /api/v1/auth/signup:
     post:
       tags:
@@ -672,6 +913,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/InputError"
+        "409":
+          description: Conflict with database
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConflictError"
   /api/v1/auth/signout:
     post:
       tags:
@@ -705,6 +952,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/InputError"
+        "409":
+          description: Conflict with database
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConflictError"
   /api/v1/auth/forgot-password:
     post:
       tags:
@@ -748,6 +1001,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/InputError"
+        "409":
+          description: Conflict with database
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConflictError"
   /api/v1/auth/reset-password:
     post:
       tags:
@@ -785,6 +1044,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/InputError"
+        "409":
+          description: Conflict with database
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConflictError"
 components:
   securitySchemes:
     bearerAuth: # arbitrary name for the security scheme
@@ -870,6 +1135,9 @@ components:
     Payment:
       type: object
       properties:
+        orderid:
+          type: string
+          format: uuid
         stripe_id:
           type: string
           example: cs_test_a11YYufWQzNY63zpQ6QSNRQhkUpVph4WRmzW0zWJO2znZKdVujZ0N0S22u
@@ -893,10 +1161,6 @@ components:
         status:
           type: string
           example: open
-        url:
-          type: string
-          format: url
-          example: https://checkout.stripe.com/c/pay/cs_test_a11YYufWQzNY63zpQ6QSNRQhkUpVph4WRmzW0zWJO2znZKdVujZ0N0S22u#fidkdWxOYHwnPyd1blpxYHZxWjA0SDdPUW5JbmFMck1wMmx9N2BLZjFEfGRUNWhqTmJ%2FM2F8bUA2SDRySkFdUV81T1BSV0YxcWJcTUJcYW5rSzN3dzBLPUE0TzRKTTxzNFBjPWZEX1NKSkxpNTVjRjN8VHE0YicpJ2N3amhWYHdzYHcnP3F3cGApJ2lkfGpwcVF8dWAnPyd2bGtiaWBabHFgaCcpJ2BrZGdpYFVpZGZgbWppYWB3dic%2FcXdwYHgl
     DetailedOrder:
       allOf:
         - type: object
@@ -909,8 +1173,10 @@ components:
         - $ref: "#/components/schemas/Order"
         - type: object
           properties:
-            payment:
-              $ref: "#/components/schemas/Payment"
+            stripe_url:
+              type: string
+              format: url
+              example: https://checkout.stripe.com/c/pay/cs_test_a11YYufWQzNY63zpQ6QSNRQhkUpVph4WRmzW0zWJO2znZKdVujZ0N0S22u#fidkdWxOYHwnPyd1blpxYHZxWjA0SDdPUW5JbmFMck1wMmx9N2BLZjFEfGRUNWhqTmJ%2FM2F8bUA2SDRySkFdUV81T1BSV0YxcWJcTUJcYW5rSzN3dzBLPUE0TzRKTTxzNFBjPWZEX1NKSkxpNTVjRjN8VHE0YicpJ2N3amhWYHdzYHcnP3F3cGApJ2lkfGpwcVF8dWAnPyd2bGtiaWBabHFgaCcpJ2BrZGdpYFVpZGZgbWppYWB3dic%2FcXdwYHgl
         - $ref: "#/components/schemas/TimeStamp"
     Inventory:
       type: object
@@ -1204,3 +1470,12 @@ components:
         message:
           type: string
           example: The user is missing the required permission
+    ConflictError:
+      type: object
+      properties:
+        code:
+          type: string
+          example: DUPLICATED_EMAIL
+        message:
+          type: string
+          example: The email is already registered
