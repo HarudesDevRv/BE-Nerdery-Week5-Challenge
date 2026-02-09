@@ -1,7 +1,7 @@
 import { Exclude, Expose } from "class-transformer";
 
 @Exclude()
-export class ResetToken {
+export class ResetTokenDto {
   @Expose()
   readonly reset_token!: string;
 

@@ -10,18 +10,84 @@ info:
   contact:
     email: luisrendon@ravn.co
 tags:
-  - name: Managers
-    description: Manage the products
-  - name: Clients
-    description: Search and buy products
+  - name: Products
+    description: Manage and get the products
+  - name: Orders
+    description: Manage and get the orders
   - name: Authentication
     description: Authentication endpoints
 paths:
-  /api/v1/products:
+  /api/v1/products/categories:
     get:
       tags:
-        - Clients
-        - Public
+        - Products
+      summary: Gets all the available categories
+      description: Gets a list with all the available categories data
+      operationId: getCategories
+      responses:
+        "200":
+          description: Categories successfully retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      categories:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Category"
+  /api/v1/products:
+    post:
+      tags:
+        - Products
+      summary: Creates a new product
+      operationId: createProduct
+      description: Adds a product to the system by specifying the product data, category id, brand id, images and a list of inventories
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewProduct"
+        description: Product to add
+      responses:
+        "200":
+          description: Product created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Product created successfully"
+                  data:
+                    $ref: "#/components/schemas/NewProductResult"
+        "400":
+          description: Bad input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InputError"
+        "401":
+          description: Unauthenticated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthenticatedError"
+        "403":
+          description: Unauthorized user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
+    get:
+      tags:
+        - Products
       summary: Gets the products
       operationId: getProducts
       description: Gets a paginated list of products with the option to filter by category name, and specify the page and the products by page.
@@ -76,56 +142,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/NotFoundError"
-    post:
-      tags:
-        - Managers
-      summary: Creates a new product
-      operationId: createProduct
-      description: Adds a product to the system by specifying the product data, category id, brand id, images and a list of inventories
-      security:
-        - bearerAuth: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/NewProduct"
-        description: Product to add
-      responses:
-        "200":
-          description: Product created
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: "Product created successfully"
-                  data:
-                    $ref: "#/components/schemas/NewProductResult"
-        "400":
-          description: Bad input data
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/InputError"
-        "401":
-          description: Unauthenticated user
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/UnauthenticatedError"
-        "403":
-          description: Unauthorized user
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/UnauthorizedError"
   /api/v1/products/{id}:
     get:
       tags:
-        - Clients
-        - Public
+        - Products
       summary: Gets a product detail
       operationId: getProductDetail
       description: Gets the detail of the product referenced by the id
@@ -165,7 +185,7 @@ paths:
                 $ref: "#/components/schemas/NotFoundError"
     put:
       tags:
-        - Managers
+        - Products
       summary: Updates a product
       operationId: updateProduct
       description: Updates the data of the product referred with the id
@@ -221,7 +241,7 @@ paths:
                 $ref: "#/components/schemas/NotFoundError"
     patch:
       tags:
-        - Managers
+        - Products
       summary: Partially updates an existing product
       operationId: patchProduct
       description: Partially updates the product referred by the id
@@ -277,7 +297,7 @@ paths:
                 $ref: "#/components/schemas/NotFoundError"
     delete:
       tags:
-        - Managers
+        - Products
       summary: Deletes a product
       operationId: deleteProduct
       description: Deletes the product referred by the id
@@ -322,7 +342,7 @@ paths:
   /api/v1/products/{id}/images:
     post:
       tags:
-        - Managers
+        - Products
       summary: Adds an image to a product
       description: Adds an image url to the product images
       operationId: addImageToProduct
@@ -395,7 +415,7 @@ paths:
   /api/v1/products/{product}/images/{image}:
     put:
       tags:
-        - Managers
+        - Products
       summary: Replaces an image from a product
       description: Replaces an image url from the product images
       operationId: replaceImageFromProduct
@@ -464,7 +484,7 @@ paths:
                 $ref: "#/components/schemas/NotFoundError"
     delete:
       tags:
-        - Managers
+        - Products
       summary: Deletes an image from a product
       description: Deletes an image url from the product images
       operationId: deleteImageFromProduct
@@ -531,33 +551,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/NotFoundError"
-  /api/v1/categories:
-    get:
-      tags:
-        - Clients
-        - Public
-      summary: Gets all the available categories
-      description: Gets a list with all the available categories data
-      operationId: getCategories
-      responses:
-        "200":
-          description: Categories successfully retrieved
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      categories:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/Category"
   /api/v1/products/{id}/likes:
     put:
       tags:
-        - Clients
+        - Products
       summary: Like a product
       description: Changes the Like status of a product for an specific user
       operationId: likeProduct
@@ -615,7 +612,7 @@ paths:
   /api/v1/clients/{id}/orders:
     get:
       tags:
-        - Managers
+        - Orders
       summary: Gets a client orders
       description: Gets the orders of the client referred by the id
       operationId: getClientOrders
@@ -668,7 +665,7 @@ paths:
                 $ref: "#/components/schemas/NotFoundError"
     post:
       tags:
-        - Clients
+        - Orders
       summary: Creates a client order
       description: Creates a user order related to the user referred by the id
       operationId: createOrder
@@ -720,7 +717,7 @@ paths:
   /api/v1/clients/{id}/carts:
     post:
       tags:
-        - Clients
+        - Orders
       summary: Adds a product to the client cart
       description: Add a product to the cart of the client specified by the id
       operationId: addItemToCart
@@ -770,7 +767,7 @@ paths:
                 $ref: "#/components/schemas/NotFoundError"
     put:
       tags:
-        - Clients
+        - Orders
       summary: Updates the cart products
       description: Updates the full list of items of the cart for the user specified by the id
       operationId: deleteCartItem
@@ -834,7 +831,7 @@ paths:
   /api/v1/payments:
     post:
       tags:
-        - Clients
+        - Orders
       summary: Stores the Stripe payment data
       description: Stores the Stripe payment data according to the stripe_id and links it to its order
       operationId: storeStripePayment

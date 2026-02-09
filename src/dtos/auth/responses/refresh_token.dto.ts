@@ -1,7 +1,7 @@
 import { Exclude, Expose } from "class-transformer";
 
 @Exclude()
-export class CredentialsDto {
+export class RefreshTokenDto {
   @Expose()
   readonly refresh_token!: string;
 

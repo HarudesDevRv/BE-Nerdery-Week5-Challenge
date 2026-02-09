@@ -6,20 +6,17 @@ import * as bcrypt from "bcrypt";
 
 import prisma from "../prisma";
 import { SignInDto } from "../dtos/auth/requests/signin.dto";
-import { CredentialsDto } from "../dtos/auth/responses/signin.dto";
+import { RefreshTokenDto } from "../dtos/auth/responses/refresh_token.dto";
 import jwt from "jsonwebtoken";
 import { SignOutDto } from "../dtos/auth/requests/signout.dto";
 import { ForgotPasswordDto } from "../dtos/auth/requests/forgot_password.dto";
-import { ResetToken } from "../dtos/auth/responses/forgot_password.dto";
+import { ResetTokenDto } from "../dtos/auth/responses/reset_token.dto";
 import { ResetPasswordDto } from "../dtos/auth/requests/reset_password.dto";
-import * as nodemailer from "nodemailer";
-import { transcode } from "buffer";
 
-// TODO: Create a secure private key
-const privateKey = "nerdery";
+const privateKey = process.env.PRIVATE_KEY!;
 
 export class AuthService {
-  static async createAccessToken(email: string): Promise<CredentialsDto> {
+  static async createAccessToken(email: string): Promise<RefreshTokenDto> {
     const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {
@@ -37,7 +34,7 @@ export class AuthService {
     });
 
     return plainToInstance(
-      CredentialsDto,
+      RefreshTokenDto,
       {
         refresh_token: authToken.refreshToken,
         expires_at: authToken.expiresAt,
@@ -48,7 +45,7 @@ export class AuthService {
     );
   }
 
-  static async createResetToken(email: string): Promise<ResetToken> {
+  static async createResetToken(email: string): Promise<ResetTokenDto> {
     const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {
@@ -66,7 +63,7 @@ export class AuthService {
     });
 
     return plainToInstance(
-      ResetToken,
+      ResetTokenDto,
       {
         reset_token: authToken.resetToken,
         expires_at: authToken.expiresAt,
@@ -122,7 +119,7 @@ export class AuthService {
     );
   }
 
-  static async signin(body: SignInDto): Promise<CredentialsDto> {
+  static async signin(body: SignInDto): Promise<RefreshTokenDto> {
     const user = await prisma.user.findUnique({
       where: { email: body.email },
     });
@@ -135,7 +132,7 @@ export class AuthService {
     } else {
       throw new Conflict("The email is not registered");
     }
-    // TODO: Improve logic
+
     const authToken = await this.createAccessToken(user.email);
 
     return authToken;
@@ -153,7 +150,7 @@ export class AuthService {
     await this.disableToken(user.userId, body.refresh_token);
   }
 
-  static async forgotPassword(body: ForgotPasswordDto): Promise<ResetToken> {
+  static async forgotPassword(body: ForgotPasswordDto): Promise<ResetTokenDto> {
     const user = await prisma.user.findUnique({
       where: { email: body.email },
     });
@@ -162,20 +159,12 @@ export class AuthService {
       throw new Conflict("The email is not registered");
     }
 
-    const mailer = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: "luisrendon@ravn.co",
-        pass: "",
-      },
-    });
-
     const resetPassword = await this.createResetToken(user.email);
 
     return resetPassword;
   }
 
-  static async resetPassword(body: ResetPasswordDto): Promise<CredentialsDto> {
+  static async resetPassword(body: ResetPasswordDto): Promise<RefreshTokenDto> {
     const token = await prisma.passwordReset.findUnique({
       where: {
         resetToken: body.reset_token,
@@ -190,34 +179,36 @@ export class AuthService {
       throw Conflict("Token already expired, please start again");
     }
 
-    const user = await prisma.user.update({
-      where: {
-        userId: token.userId,
-      },
-      data: {
-        password: await bcrypt.hash(body.new_password, 10),
-      },
-    });
+    const newToken = await prisma.$transaction(async (prisma) => {
+      const user = await prisma.user.update({
+        where: {
+          userId: token.userId,
+        },
+        data: {
+          password: await bcrypt.hash(body.new_password, 10),
+        },
+      });
 
-    await prisma.passwordReset.update({
-      where: {
-        resetToken: body.reset_token,
-      },
-      data: {
-        consumed: true,
-      },
-    });
+      await prisma.passwordReset.update({
+        where: {
+          resetToken: body.reset_token,
+        },
+        data: {
+          consumed: true,
+        },
+      });
 
-    await prisma.refreshToken.updateMany({
-      where: {
-        userId: user.userId,
-      },
-      data: {
-        revoked: true,
-      },
-    });
+      await prisma.refreshToken.updateMany({
+        where: {
+          userId: user.userId,
+        },
+        data: {
+          revoked: true,
+        },
+      });
 
-    const newToken = await this.createAccessToken(user.email);
+      return this.createAccessToken(user.email);
+    });
 
     return newToken;
   }
