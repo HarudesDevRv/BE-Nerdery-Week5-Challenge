@@ -45,7 +45,7 @@ paths:
         - Products
       summary: Creates a new product
       operationId: createProduct
-      description: Adds a product to the system by specifying the product data, category id, brand id, images and a list of inventories
+      description: Adds a product to the system by specifying the product data, category id, brand id, images and a list of inventories. The user must have a Manager account.
       security:
         - bearerAuth: []
       requestBody:
@@ -148,7 +148,7 @@ paths:
         - Products
       summary: Gets a product detail
       operationId: getProductDetail
-      description: Gets the detail of the product referenced by the id
+      description: Gets the detail of the product referenced by the id.
       parameters:
         - in: path
           name: id
@@ -188,7 +188,7 @@ paths:
         - Products
       summary: Updates a product
       operationId: updateProduct
-      description: Updates the data of the product referred with the id
+      description: Updates the data of the product referred with the id. The user must have a Manager account.
       parameters:
         - in: path
           name: id
@@ -244,7 +244,7 @@ paths:
         - Products
       summary: Partially updates an existing product
       operationId: patchProduct
-      description: Partially updates the product referred by the id
+      description: Partially updates the product referred by the id. The user must have a Manager account.
       parameters:
         - in: path
           name: id
@@ -270,7 +270,7 @@ paths:
                     type: string
                     example: Product updated successfully
                   data:
-                    $ref: "#/components/schemas/DetailedProduct"
+                    $ref: "#/components/schemas/NewProductResult"
         "400":
           description: Bad input data
           content:
@@ -300,7 +300,7 @@ paths:
         - Products
       summary: Deletes a product
       operationId: deleteProduct
-      description: Deletes the product referred by the id
+      description: Deletes the product referred by the id. The user must have a Manager account.
       parameters:
         - in: path
           name: id
@@ -344,7 +344,7 @@ paths:
       tags:
         - Products
       summary: Adds an image to a product
-      description: Adds an image url to the product images
+      description: Adds an image url to the product images. The user must have a Manager account.
       operationId: addImageToProduct
       parameters:
         - in: path
@@ -417,7 +417,7 @@ paths:
       tags:
         - Products
       summary: Replaces an image from a product
-      description: Replaces an image url from the product images
+      description: Replaces an image url from the product images. The user must have a Manager account.
       operationId: replaceImageFromProduct
       parameters:
         - in: path
@@ -486,7 +486,7 @@ paths:
       tags:
         - Products
       summary: Deletes an image from a product
-      description: Deletes an image url from the product images
+      description: Deletes an image url from the product images. The user must have a Manager account.
       operationId: deleteImageFromProduct
       parameters:
         - in: path
@@ -556,7 +556,7 @@ paths:
       tags:
         - Products
       summary: Like a product
-      description: Changes the Like status of a product for an specific user
+      description: Changes the Like status of a product for an specific user. The user must have a Client account and the token should belong to that account.
       operationId: likeProduct
       parameters:
         - in: path
@@ -609,12 +609,72 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/NotFoundError"
+  /api/v1/orders:
+    get:
+      tags:
+        - Orders
+      summary: Gets all clients orders
+      description: Gets a list with all the clients orders. The user must have a Manager account.
+      operationId: getAllClientsOrders
+      parameters:
+        - in: query
+          name: page
+          description: Pagination page
+          schema:
+            type: integer
+          required: false
+        - in: query
+          name: limit
+          description: Pagination limit
+          schema:
+            type: integer
+          required: false
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Client orders successfully retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Client orders retrieved successfully
+                  data:
+                    type: object
+                    required:
+                      - orders
+                    properties:
+                      orders:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/DetailedOrder"
+        "400":
+          description: Bad input data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InputError"
+        "401":
+          description: Unauthenticated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthenticatedError"
+        "403":
+          description: Unauthorized user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnauthorizedError"
   /api/v1/clients/{id}/orders:
     get:
       tags:
         - Orders
       summary: Gets a client orders
-      description: Gets the orders of the client referred by the id
+      description: Gets the orders of the client referred by the id. Manager accounts can see any user order. Client accounts can only see their orders.
       operationId: getClientOrders
       parameters:
         - in: path
@@ -667,7 +727,7 @@ paths:
       tags:
         - Orders
       summary: Creates a client order
-      description: Creates a user order related to the user referred by the id
+      description: Creates a user order related to the user referred by the id. The user must have a Client account and the token should belong to that account.
       operationId: createOrder
       parameters:
         - in: path
@@ -719,7 +779,7 @@ paths:
       tags:
         - Orders
       summary: Adds a product to the client cart
-      description: Add a product to the cart of the client specified by the id
+      description: Add a product to the cart of the client specified by the id. The user must have a Client account and the token should belong to that account.
       operationId: addItemToCart
       parameters:
         - in: path
@@ -769,7 +829,7 @@ paths:
       tags:
         - Orders
       summary: Updates the cart products
-      description: Updates the full list of items of the cart for the user specified by the id
+      description: Updates the full list of items of the cart for the user specified by the id. The user must have a Client account and the token should belong to that account.
       operationId: deleteCartItem
       parameters:
         - in: path
@@ -833,7 +893,7 @@ paths:
       tags:
         - Orders
       summary: Stores the Stripe payment data
-      description: Stores the Stripe payment data according to the stripe_id and links it to its order
+      description: Stores the Stripe payment data according to the stripe_id and links it to its order. The user must have a Client account and the token should belong to that account.
       operationId: storeStripePayment
       requestBody:
         content:
@@ -842,7 +902,7 @@ paths:
               $ref: "#/components/schemas/Payment"
       responses:
         "200":
-          description: Payment stored successfuly
+          description: Payment stored successfully
           content:
             application/json:
               schema:
@@ -1095,7 +1155,6 @@ components:
               type: string
               format: url
               example: www.imageLink.com
-        - $ref: "#/components/schemas/TimeStamp"
     OrderProduct:
       type: object
       required:
@@ -1141,6 +1200,7 @@ components:
           minItems: 1
         status:
           type: string
+          enum: [Pending, Paid, Processing, Shipped, Delivered, Cancelled]
           example: Pending
     Payment:
       type: object
@@ -1229,10 +1289,6 @@ components:
         description:
           type: string
           example: Formal T-shirt
-        inventories:
-          type: array
-          items:
-            $ref: "#/components/schemas/Inventory"
         image_urls:
           type: array
           items:
@@ -1240,10 +1296,6 @@ components:
           example:
             - www.imageLink.com
             - www.image2Link.com
-        is_active:
-          type: boolean
-          example: true
-          default: true
     OptionalProduct:
       allOf:
         - type: object
@@ -1255,6 +1307,16 @@ components:
               type: string
               format: uuid
         - $ref: "#/components/schemas/BaseProduct"
+        - type: object
+          properties:
+            is_active:
+              type: boolean
+              example: true
+              default: true
+            inventories:
+              type: array
+              items:
+                $ref: "#/components/schemas/Inventory"
     NewProduct:
       allOf:
         - $ref: "#/components/schemas/OptionalProduct"
@@ -1290,7 +1352,24 @@ components:
               type: string
               example: Nike
         - $ref: "#/components/schemas/BaseProduct"
-        - $ref: "#/components/schemas/TimeStamp"
+        - type: object
+          properties:
+            price:
+              type: number
+              minimum: 0
+              exclusiveMinimum: true
+              example: 19.99
+            sale_price:
+              type: number
+              minimum: 0
+              example: 16.99
+              exclusiveMinimum: true
+              default: null
+            stock:
+              type: integer
+              minimum: 0
+              example: 10
+              default: 0
       required:
         - product_id
         - category
